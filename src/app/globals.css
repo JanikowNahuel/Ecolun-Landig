@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de la guía visual de Ecolun.
+ * Los hex de marca van tal cual; "teal-profundo" y "tinta" son agregados
+ * para que el texto llegue a contraste AA (el teal principal con blanco da 3,6:1,
+ * alcanza solo para titulares grandes).
+ */
+@theme {
+  --color-teal: #4f9197;
+  --color-teal-claro: #6dacb1;
+  --color-teal-profundo: #3d7980;
+  --color-menta: #90c3a2;
+  --color-aqua: #b0e4e5;
+  --color-gris-claro: #f7f7f7;
+  --color-gris-medio: #d9d9d9;
+  --color-tinta: #1f4649;
+  --color-tinta-suave: #3f6a6e;
+
+  /* pantalla del ecógrafo */
+  --color-eco-fondo: #0e2426;
+  --color-eco-brillo: #d8f4f2;
+
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-mano: var(--font-gochi), ui-rounded, cursive;
+
+  --radius-pieza: 1.75rem;
+
+  --animate-latido: latido 1.1s ease-in-out infinite;
+  --animate-onda: onda 1.15s linear infinite;
+
+  @keyframes onda {
+    to {
+      transform: translateX(-38px);
+    }
+  }
+
+  @keyframes latido {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    40% {
+      transform: scale(1.35);
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-gris-claro);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-menta);
+    color: var(--color-tinta);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-teal-profundo);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+/* Etiqueta tipo "01 — LA VIBRA" de la guía: SemiBold, mayúsculas, espaciado 25 %. */
+@utility etiqueta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* Degradé de los fondos teal: más claro arriba a la derecha. */
+@utility fondo-teal {
+  background:
+    radial-gradient(120% 90% at 100% 0%, var(--color-teal-claro) 0%, transparent 55%),
+    linear-gradient(200deg, var(--color-teal) 0%, var(--color-teal-profundo) 100%);
+}
+
+/*
+ * Marco en arco para retratos 4:5: medio círculo arriba (radio vertical 40 %
+ * del alto = mitad del ancho) y esquinas redondeadas abajo. Con rounded-t-full
+ * el navegador achica todos los radios y las esquinas de abajo quedan rectas.
+ */
+@utility marco-arco {
+  border-radius: 50% 50% var(--radius-pieza) var(--radius-pieza) / 40% 40% var(--radius-pieza) var(--radius-pieza);
+}
