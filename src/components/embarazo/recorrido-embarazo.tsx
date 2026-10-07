@@ -8,17 +8,17 @@ import { useReducirMovimiento } from "@/hooks/use-reducir-movimiento";
 import { useVentanasEtapas } from "@/hooks/use-ventanas-etapas";
 import { centroEtapa } from "@/lib/embarazo/linea-de-tiempo";
 import { linkWhatsApp } from "@/lib/whatsapp";
+import { Escaner } from "@/components/escaner/escaner";
 import { ArcosFondo } from "@/components/ui/arcos-fondo";
 import { Boton } from "@/components/ui/boton";
 import { Resaltado } from "@/components/ui/resaltado";
 import { BarraEtapas } from "./barra-etapas";
-import { PantallaEcografo } from "./pantalla-ecografo";
 import { TextoEtapa } from "./texto-etapa";
 
 const N = etapasEmbarazo.length;
 
 /**
- * "Tu embarazo, eco a eco". La sección mide ~4,6 pantallas; el contenido
+ * "Tu embarazo, eco a eco". La sección mide ~5,2 pantallas; el contenido
  * queda fijo (sticky) y el scroll dentro de ella mueve una sola línea de
  * tiempo de 0 a 1.
  *
@@ -26,8 +26,8 @@ const N = etapasEmbarazo.length;
  * la persona con su propio scroll (y Windows Server o los "efectos de
  * animación" apagados lo activan sin que nadie lo haya pedido). Lo que se
  * saca es lo que se mueve solo: el suavizado con resorte, el deslizamiento
- * de los textos y el scroll animado de la barra. Latido y doppler ya se
- * apagan con motion-reduce.
+ * de los textos, el balanceo del transductor, las ondas del haz y el scroll
+ * animado de la barra.
  */
 function Titulo({ id }: { id?: string }) {
   return (
@@ -78,15 +78,15 @@ export function RecorridoEmbarazo() {
   return (
     <section id="embarazo" aria-labelledby="titulo-embarazo" className="relative bg-white">
       {/* el tramo alto es el que mide el scroll; lo que venga después no se monta encima del sticky */}
-      <div ref={ref} data-recorrido-embarazo className="relative h-[460svh]">
+      <div ref={ref} data-recorrido-embarazo className="relative h-[520svh]">
         <div className="sticky top-0 flex h-svh flex-col overflow-hidden">
           <ArcosFondo tono="oscuro" className="opacity-60" />
-          <div className="relative mx-auto grid w-full max-w-6xl flex-1 content-center items-center gap-5 px-4 pt-20 pb-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,500px)] lg:gap-16 lg:px-8 lg:pt-24">
+          <div className="relative mx-auto grid w-full max-w-6xl flex-1 content-center items-center gap-5 px-4 pt-20 pb-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:gap-16 lg:px-8 lg:pt-24">
             <div className="order-2 lg:order-1">
               <div className="hidden lg:block">
                 <Titulo id="titulo-embarazo" />
               </div>
-              <div className="relative min-h-[15.5rem] sm:min-h-[14rem] lg:mt-10 lg:min-h-[17rem]">
+              <div className="relative min-h-[14.5rem] sm:min-h-[14rem] [@media(max-height:720px)]:min-h-[10.5rem] lg:mt-10 lg:min-h-[17rem]">
                 {etapasEmbarazo.map((e, i) => (
                   <TextoEtapa key={e.id} etapa={e} visible={visibles[i]} deslizar={!reducir} />
                 ))}
@@ -98,12 +98,16 @@ export function RecorridoEmbarazo() {
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="mb-4 lg:hidden">
+              <div className="mb-2 lg:hidden">
                 <p className="etiqueta text-teal-profundo">02 — Tu embarazo, eco a eco</p>
               </div>
-              <div className="mx-auto w-full max-w-[min(100%,39svh)] lg:max-w-[500px]">
-                <PantallaEcografo progreso={progreso} />
-              </div>
+              <Escaner
+                etapas={etapasEmbarazo}
+                progreso={progreso}
+                visibles={visibles}
+                reducir={reducir}
+                className="mx-auto w-full max-w-[min(100%,36svh)] lg:max-w-[480px]"
+              />
             </div>
           </div>
         </div>

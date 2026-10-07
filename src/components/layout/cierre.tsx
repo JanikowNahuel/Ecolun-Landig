@@ -1,5 +1,6 @@
 import { MessageCircle } from "lucide-react";
 import { consultorio, sedePrincipal } from "@/content/consultorio";
+import { creditosImagenes } from "@/content/creditos-imagenes";
 import { enlacesNavegacion } from "@/content/navegacion";
 import { linkWhatsApp } from "@/lib/whatsapp";
 import { Boton } from "@/components/ui/boton";
@@ -68,10 +69,43 @@ export function Cierre() {
           </ul>
         </div>
         <div className="border-t border-white/15">
-          <p className="mx-auto max-w-6xl px-4 pt-5 pb-24 text-xs leading-relaxed text-white/70 sm:px-6 sm:pb-5 lg:px-8">
-            © {new Date().getFullYear()} {consultorio.nombre}. La información de este sitio es orientativa y no
-            reemplaza la indicación de tu médico. Las imágenes de ecografía son ilustraciones.
-          </p>
+          <div className="mx-auto max-w-6xl space-y-3 px-4 pt-5 pb-24 text-xs leading-relaxed text-white/70 sm:px-6 sm:pb-5 lg:px-8">
+            <p>
+              © {new Date().getFullYear()} {consultorio.nombre}. La información de este sitio es orientativa y no
+              reemplaza la indicación de tu médico.
+            </p>
+            <details className="group">
+              <summary className="cursor-pointer list-none text-white/80 hover:text-white">
+                Créditos de las ecografías <span className="group-open:hidden">+</span>
+                <span className="hidden group-open:inline">−</span>
+              </summary>
+              <ul className="mt-2 space-y-1">
+                {creditosImagenes.map((c) => (
+                  <li key={c.id}>
+                    {c.descripcion}:{" "}
+                    <a
+                      href={c.fuenteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-white"
+                    >
+                      {c.autor}
+                    </a>
+                    ,{" "}
+                    <a
+                      href={c.licenciaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-white"
+                    >
+                      {c.licencia}
+                    </a>
+                    {c.cambios !== "ninguno" ? ` (${c.cambios})` : ""}. Wikimedia Commons.
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </div>
         </div>
       </footer>
     </>

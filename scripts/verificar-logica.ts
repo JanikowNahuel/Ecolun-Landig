@@ -3,13 +3,16 @@
  * Correr con: npm run verificar
  */
 import {
+  CONO,
   avanceDentroDeEtapa,
+  barridoEtapa,
   centroEtapa,
-  formatearSemana,
-  semanasClave,
+  etapaActual,
+  inclinacionTransductor,
+  mascaraBarrido,
+  sentidoEtapa,
   ventanaEtapa,
 } from "../src/lib/embarazo/linea-de-tiempo.ts";
-import { caminoAbanico, caminoOndaDoppler, puntosEnCurva } from "../src/lib/embarazo/abanico.ts";
 
 let fallas = 0;
 let total = 0;
@@ -25,6 +28,7 @@ function chequear(nombre: string, ok: boolean, detalle?: unknown) {
 }
 
 const creciente = (xs: number[]) => xs.every((x, i) => i === 0 || x > xs[i - 1]);
+const cerca = (a: number, b: number, tol = 1e-9) => Math.abs(a - b) <= tol;
 
 /** Interpolación lineal por tramos, igual que useTransform. */
 function interpolar(puntos: number[], valores: number[], x: number): number {
@@ -35,50 +39,83 @@ function interpolar(puntos: number[], valores: number[], x: number): number {
   return valores[i - 1] + t * (valores[i] - valores[i - 1]);
 }
 
-console.log("Línea de tiempo del embarazo");
-const N = 4;
-chequear(
-  "centros de etapa en 1/8, 3/8, 5/8, 7/8",
-  [0, 1, 2, 3].every((i) => centroEtapa(i, N) === (2 * i + 1) / 8),
-);
+const N = 5;
+const muestras = Array.from({ length: 2001 }, (_, k) => k / 2000);
 
+console.log("Reparto del scroll entre etapas");
+chequear(
+  "centros de etapa en 0,1 · 0,3 · 0,5 · 0,7 · 0,9",
+  [0, 1, 2, 3, 4].every((i) => cerca(centroEtapa(i, N), (2 * i + 1) / 10)),
+);
 for (let i = 0; i < N; i++) {
   const v = ventanaEtapa(i, N, 0.05);
   chequear(`ventana ${i}: puntos estrictamente crecientes`, creciente(v.puntos), v.puntos);
   chequear(`ventana ${i}: visible en su centro`, interpolar(v.puntos, v.valores, centroEtapa(i, N)) === 1);
 }
-
-let sumaOk = true;
-let nuncaVacio = true;
-for (let k = 0; k <= 1000; k++) {
-  const p = k / 1000;
-  const suma = [0, 1, 2, 3].reduce((acc, i) => {
-    const v = ventanaEtapa(i, N, 0.05);
-    return acc + interpolar(v.puntos, v.valores, p);
-  }, 0);
-  if (Math.abs(suma - 1) > 1e-9) sumaOk = false;
-  if (suma < 0.99) nuncaVacio = false;
-}
-chequear("los fundidos cruzados suman siempre 1 (nunca hay pantalla en blanco)", sumaOk && nuncaVacio);
-
-chequear("avance dentro de la etapa 0 al empezar", avanceDentroDeEtapa(0, 0, N) === 0);
-chequear("avance completo de la etapa 1 al llegar a 0,5", avanceDentroDeEtapa(0.5, 1, N) === 1);
-chequear("avance de la etapa 3 todavía en 0 a mitad de camino", avanceDentroDeEtapa(0.5, 3, N) === 0);
-
-const s = semanasClave([7, 12, 22, 32], N);
-chequear("semanas clave: puntos crecientes", creciente(s.puntos), s.puntos);
-chequear("semana en el centro de la etapa 2 = 22", interpolar(s.puntos, s.valores, centroEtapa(2, N)) === 22);
-chequear("formato SEM 07", formatearSemana(6.6) === "SEM 07");
-
-console.log("Geometría del abanico");
-chequear("el abanico es un camino cerrado", caminoAbanico().trim().endsWith("Z"));
-chequear("el abanico no tiene NaN", !caminoAbanico().includes("NaN"));
-const onda = caminoOndaDoppler(400);
-chequear("la onda del doppler cubre todo el ancho", onda.includes("L 438 0"), onda.slice(-30));
-const vertebras = puntosEnCurva({ x: 0, y: 0 }, { x: 5, y: 10 }, { x: 10, y: 0 }, 5);
 chequear(
-  "las vértebras arrancan y terminan en los extremos",
-  vertebras[0].x === 0 && vertebras[4].x === 10 && vertebras.length === 5,
+  "los fundidos cruzados suman siempre 1 (nunca hay textos en blanco)",
+  muestras.every((p) =>
+    cerca(
+      [0, 1, 2, 3, 4].reduce((acc, i) => {
+        const v = ventanaEtapa(i, N, 0.05);
+        return acc + interpolar(v.puntos, v.valores, p);
+      }, 0),
+      1,
+    ),
+  ),
+);
+chequear("avance de la etapa 1 completo al llegar a 0,4", avanceDentroDeEtapa(0.4, 1, N) === 1);
+chequear("etapa actual al final del scroll = la última", etapaActual(1, N) === N - 1);
+chequear("etapa actual al empezar = la primera", etapaActual(0, N) === 0);
+
+console.log("Barrido del haz");
+chequear("al empezar no hay nada escaneado (pantalla 'esperando señal')", barridoEtapa(0, 0, N) === 0);
+chequear(
+  "cada etapa termina de escanearse antes de la mitad de su tramo",
+  [0, 1, 2, 3, 4].every((i) => barridoEtapa(centroEtapa(i, N), i, N) === 1),
+);
+chequear(
+  "el barrido nunca retrocede al avanzar el scroll",
+  [0, 1, 2, 3, 4].every((i) =>
+    muestras.every((p, k) => k === 0 || barridoEtapa(p, i, N) >= barridoEtapa(muestras[k - 1], i, N)),
+  ),
+);
+chequear("las etapas alternan el sentido", sentidoEtapa(0) === 1 && sentidoEtapa(1) === -1 && sentidoEtapa(2) === 1);
+
+const vacio = mascaraBarrido(0, 1);
+const lleno = mascaraBarrido(1, 1);
+const llenoInverso = mascaraBarrido(1, -1);
+chequear("máscara vacía al empezar", vacio.abarca === 0);
+chequear("máscara completa cubre todo el cono", lleno.abarca === CONO.hasta - CONO.desde && lleno.desde === CONO.desde);
+chequear(
+  "en ambos sentidos la máscara completa es la misma",
+  llenoInverso.desde === lleno.desde && llenoInverso.abarca === lleno.abarca,
+);
+chequear("la línea de barrido arranca a la izquierda en las etapas pares", vacio.linea === CONO.hasta);
+chequear("y a la derecha en las impares", mascaraBarrido(0, -1).linea === CONO.desde);
+
+console.log("Transductor");
+const saltos = muestras
+  .slice(1)
+  .map((p, k) => Math.abs(inclinacionTransductor(p, N) - inclinacionTransductor(muestras[k], N)));
+chequear(
+  "la inclinación no salta entre etapas (máx. 2,5° por paso de 0,05 %)",
+  Math.max(...saltos) < 2.5,
+  Math.max(...saltos),
+);
+chequear(
+  "inclinación dentro de ±18°",
+  muestras.every((p) => Math.abs(inclinacionTransductor(p, N)) <= 18 + 1e-9),
+);
+chequear(
+  "el haz apunta hacia donde va la línea de barrido",
+  [0.05, 0.25, 0.45, 0.65, 0.85].every((p) => {
+    const i = etapaActual(p, N);
+    const linea = mascaraBarrido(barridoEtapa(p, i, N), sentidoEtapa(i)).linea;
+    const inclinacion = inclinacionTransductor(p, N);
+    // línea a la derecha del centro (180°) ⇔ ángulo < 180 ⇔ inclinación positiva
+    return Math.sign(180 - linea) === Math.sign(inclinacion) || Math.abs(inclinacion) < 1e-6;
+  }),
 );
 
 console.log(`\n${total - fallas}/${total} chequeos OK`);

@@ -79,15 +79,33 @@ export type GrupoEstudios = {
   estudios: Estudio[];
 };
 
+/** Imagen de terceros usada en la página, con su licencia (para los créditos). */
+export type CreditoImagen = {
+  id: string;
+  descripcion: string;
+  autor: string;
+  licencia: string;
+  licenciaUrl: string;
+  fuenteUrl: string;
+  /** Qué se le cambió (recorte, grises…). Obligatorio para CC BY / BY-SA. */
+  cambios: string;
+};
+
 export type EtapaEmbarazo = {
   id: string;
-  /** Semana que muestra el monitor del ecógrafo en esta etapa. */
-  semana: number;
   rango: string;
   estudio: string;
   titulo: string;
   texto: string;
-  tamanio: string;
-  /** Medición que aparece en el monitor (valores típicos de esa semana). */
+  /** Ecografía real que se escanea en el monitor. */
+  imagen: StaticImageData;
+  imagenAlt: string;
+  /** Id en creditosImagenes. */
+  credito: string;
+  /** Rótulo grande del monitor ("SEM 12", "DOPPLER"…). */
+  hud: string;
+  /** Dato que aparece abajo en el monitor. Solo lo que muestra la imagen real. */
   medida: string;
+  /** Recuadro de zona de interés sobre la imagen, en % (x, y, ancho, alto). */
+  foco: [number, number, number, number];
 };

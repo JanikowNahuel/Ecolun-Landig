@@ -1,7 +1,6 @@
 "use client";
 
 import { type MotionValue, motion, motionValue, useTransform } from "framer-motion";
-import { Baby } from "lucide-react";
 import type { EtapaEmbarazo } from "@/types/contenido";
 import { cn } from "@/lib/cn";
 
@@ -32,11 +31,11 @@ export function TextoEtapa({ etapa, visible, deslizar = true, className }: Props
         {etapa.rango}
       </span>
       <h3 className="mt-4 text-2xl font-semibold leading-tight text-tinta sm:text-[1.75rem]">{etapa.estudio}</h3>
-      <p className="mt-1 text-base font-light text-teal-profundo sm:text-lg">{etapa.titulo}</p>
-      <p className="mt-3 max-w-md text-[0.95rem] leading-relaxed text-tinta-suave sm:text-base">{etapa.texto}</p>
-      <p className="mt-3 inline-flex items-center gap-2 text-sm text-tinta-suave">
-        <Baby aria-hidden className="size-4 text-teal" strokeWidth={1.75} />
-        {etapa.tamanio}
+      <p className="mt-1 text-base font-light text-teal-profundo sm:text-lg [@media(max-height:720px)]:hidden">
+        {etapa.titulo}
+      </p>
+      <p className="mt-3 max-w-md text-[0.95rem] leading-relaxed text-tinta-suave sm:text-base [@media(max-height:720px)]:line-clamp-3">
+        {etapa.texto}
       </p>
     </motion.article>
   );

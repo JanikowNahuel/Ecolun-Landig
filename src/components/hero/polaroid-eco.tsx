@@ -1,11 +1,8 @@
 "use client";
 
-import { motion, motionValue, useScroll, useTransform } from "framer-motion";
-import { PantallaEcografo } from "@/components/embarazo/pantalla-ecografo";
-import { centroEtapa } from "@/lib/embarazo/linea-de-tiempo";
-
-/** La polaroid muestra la eco de las 12 semanas (segunda etapa). */
-const PROGRESO_POLAROID = motionValue(centroEtapa(1));
+import { motion, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
+import eco12 from "@/assets/ecos/eco-12-semanas.jpg";
 
 /**
  * Polaroid con chinche (recurso 7 de la guía): foto de eco en marco de papel,
@@ -27,7 +24,18 @@ export function PolaroidEco() {
         aria-hidden
         className="absolute -top-3 left-1/2 size-6 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_30%,#f4e3c8,#c8a676_60%,#9c7c4f)] shadow-[0_4px_8px_rgba(0,0,0,0.35)]"
       />
-      <PantallaEcografo progreso={PROGRESO_POLAROID} compacto className="rounded-[0.2rem]" />
+      {/* ecografía real (Wikimedia Commons, ver créditos en el pie) */}
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[0.2rem] bg-black">
+        <Image
+          src={eco12}
+          alt="Ecografía real de un bebé de 12 semanas de perfil"
+          fill
+          preload
+          sizes="(min-width: 640px) 330px, 72vw"
+          className="object-cover"
+          placeholder="blur"
+        />
+      </div>
       <figcaption className="absolute inset-x-0 bottom-3 text-center font-mano text-2xl text-tinta-suave sm:bottom-4 sm:text-[1.7rem]">
         ¡hola, bebé! · sem 12
       </figcaption>

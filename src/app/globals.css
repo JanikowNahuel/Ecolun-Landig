@@ -17,35 +17,10 @@
   --color-tinta: #1f4649;
   --color-tinta-suave: #3f6a6e;
 
-  /* pantalla del ecógrafo */
-  --color-eco-fondo: #0e2426;
-  --color-eco-brillo: #d8f4f2;
-
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-mano: var(--font-gochi), ui-rounded, cursive;
 
   --radius-pieza: 1.75rem;
-
-  --animate-latido: latido 1.1s ease-in-out infinite;
-  --animate-onda: onda 1.15s linear infinite;
-
-  @keyframes onda {
-    to {
-      transform: translateX(-38px);
-    }
-  }
-
-  @keyframes latido {
-    0%,
-    100% {
-      transform: scale(1);
-      opacity: 0.9;
-    }
-    40% {
-      transform: scale(1.35);
-      opacity: 1;
-    }
-  }
 }
 
 @layer base {
